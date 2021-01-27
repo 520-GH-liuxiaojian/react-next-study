@@ -815,6 +815,27 @@ const config = {
   
   ```
 
+  由于 context 属性特性 导致 context 属性不可以大规模的使用 如果有多个的 context 就会导致的大量代码产生
+
+  这个时候就可以使用  contextType 数据进行缩减
+
+  ```javascript
+  class Leaf extends Component{
+    	// contextType 只能使用一个
+      static contextType = BatteryContext
+  
+      render() {
+          const battery = this.context
+  
+          return (
+              <h1>Battery: {battery}</h1>
+          )
+      }
+  }
+  ```
+
+  
+
 + ContextType  
 
 + lazy
