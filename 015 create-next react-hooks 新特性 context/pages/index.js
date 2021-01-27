@@ -1,8 +1,8 @@
 import { Component, createContext } from 'react'
 
+// 虽然可以创建多个全局 context 但是随着创建的组件越多 组件之间的节藕性会降低
 const BatteryContext = createContext()
 const OnlineContext = createContext(false)
-
 
 function Leaf() {
     return (

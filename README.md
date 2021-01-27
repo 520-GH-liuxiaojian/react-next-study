@@ -752,8 +752,73 @@ const config = {
 ## React 最新特性以及 context 介绍
 
 + Context 提供了一种方式 能够让数据在组件书中传递而不用一级一级手动传递 【但是组件的节藕性和独立性较差】
+
+  ```javascript
+  import { Component, createContext } from 'react'
+  
+  // 这是创建 context 的方法
+  const BatteryContext = createContext()
+  // 这是创建 context 的方法写入默认值
+  const OnlineContext = createContext(false)
+  
+  
+  function Leaf() {
+      return (
+        	// 使用 context 值的消费者
+          <BatteryContext.Consumer>
+              {
+                  battery => (
+                      <OnlineContext.Consumer>
+                          {
+                              online => (
+                                  <h1>Battery: {battery}, Online: {String(online)}</h1>
+                              )
+                          }
+                      </OnlineContext.Consumer>
+                  )
+              }
+          </BatteryContext.Consumer>
+      )
+  }
+  
+  class Middle extends Component {
+      render() {
+          return (
+              <Leaf />
+          )
+      }
+  }
+  
+  class Home extends Component {
+  
+      state = {
+          battery: 0,
+          boolean: false
+      }
+  
+      render() {
+          const { battery, boolean } = this.state
+          return (
+            	// 创建的 Context 创建生产者 写入执行值
+              <BatteryContext.Provider value={battery}>
+                  <OnlineContext.Provider value={boolean}>
+                      <button onClick={() => this.setState({battery: battery + 1})}>改变</button>
+                      <button onClick={() => this.setState({boolean: !boolean})}>改变</button>
+                      <Middle />
+                  </OnlineContext.Provider>
+              </BatteryContext.Provider>
+          )
+      }
+  }
+  
+  export default Home
+  
+  ```
+
 + ContextType  
+
 + lazy
+
 + Suspense
 
 + Memo
