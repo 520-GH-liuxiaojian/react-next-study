@@ -1051,7 +1051,7 @@ function Home() {
      * useState 不能动态的增加和减少使用次数 不能多也不能少
      * 约定: useState 不能在 判断语句和循环语句中进行调用
      */
-为了在开发中提示开发者 通常会使用 eslint 工具进行提示
+为了在开发中提示开发者 通常会使用 eslint 工具进行提示zai
 
 安装 eslint-plugin-react-hooks
 
@@ -1081,4 +1081,176 @@ const [count, setCount] = useState(() => {
   return props.defaultCount ?? 0
 })
 ```
+
+
+
+## 使用 Effect hooks 
+
+在组件的使用中 不能仅仅只是使用 useState 来创建组件状态值 还有额外的业务逻辑
+
++ 绑定时间
++ 异步请求
++ 访问 DOM 元素
+
+useEffect 常常的组件的渲染之后 
+
+一个 API 就相当于
+
+componentDidMount
+
+componentDidUpdate
+
+Clean Callback
+
+
+
+传统组件的写法
+
+```javascript
+class Home extends Component {
+    state = {
+        count: 0,
+        size: {
+            width: window.document.documentElement.clientWidth,
+            height: window.document.documentElement.clientHeight
+        }
+    }
+
+    onResize = () => {
+        this.setState({
+            size: {
+                width: window.document.documentElement.clientWidth,
+                height: window.document.documentElement.clientHeight
+            }
+        })
+    }
+
+    componentDidMount() {
+        document.title = this.state.count
+        window.addEventListener('resize', this.onResize, false)
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.onResize, false)
+    }
+
+    componentDidUpdate() {
+        document.title = this.state.count
+    }
+
+    render() {
+        const { count, size } = this.state
+        return (
+            <button
+                type='button'
+                onClick={() => {this.setState({count: count + 1})}}
+            >
+                Click({count})
+                size: {size.width} * {size.height}
+            </button>
+        )
+    }
+}
+```
+
+
+
+useEffect 改造写法
+
+```javascript
+function Home() {
+    const [count, setCount] = useState(0)
+    const [size, setSize] = useState({
+        width: window.document.documentElement.clientWidth,
+        height: window.document.documentElement.clientHeight
+    })
+
+    const onResize = () => {
+        this.setState({
+            size: {
+                width: window.document.documentElement.clientWidth,
+                height: window.document.documentElement.clientHeight
+            }
+        })
+    }
+	
+    // 组件渲染之后 之后 count 值改变 就会重新执行
+    useEffect(() => {
+        document.title = count
+    })
+
+    // useEffect 第二个参数是一个可选的数组 在数组中的每一项不变的情况下才不会出发 useEffect 重新执行
+    // 如果是一个空数组 就会执行一次[刚开始那一次]
+    // 如果不传 则每一次都会执行
+    // 如果数组中的数据不变 则不会渲染 如何理解这个不变
+    useEffect(() => {
+        window.addEventListener('resize', onResize, false)
+
+        // 组件重新渲染 或者销毁就会执行 return 语句
+        return () => {
+            window.removeEventListener('resize', onResize, false)
+        }
+    }, [])
+
+    return (
+        <button
+            onClick={() => {setCount(count + 1)}}
+        >
+            Click({count})
+            size: {size.width} * {size.height}
+        </button>
+    )
+}
+```
+
+使用 useEffect 之后 只要值发生改变 逻辑就会重新执行
+
+```javascript
+useEffect(() => {
+  document.title = count
+})
+```
+
+第二个参数是一个可选的数组
+
++ 如果不传 每一次指定的职改变之后就会重新执行
+
+  ```javascript
+  useEffect(() => {
+    document.title = count
+  })
+  ```
+
++ 如果传入的是一个空数组 则 只会执行一次
+
+  ```javascript
+  useEffect(() => {
+    window.addEventListener('resize', onResize, false)
+  }, [])
+  ```
+
++ 如果传入有值的数组 数组中的每一个值发生改变 就会出发执行
+
+  ```javascript
+  useEffect(() => {
+    window.addEventListener('resize', onResize, false)
+    
+    // count 发生改变 就会重新执行
+  }, [count])
+  ```
+
++ 在 useEffect 函数的回调函数中如果返回一个函数体 那么在组件的重新渲染或则销毁的时候就会执行
+
+  ```javascript
+  useEffect(() => {
+    window.addEventListener('resize', onResize, false)
+  
+    // 组件重新渲染 或者销毁就会执行 return 语句
+    return () => {
+      window.removeEventListener('resize', onResize, false)
+    }
+  }, [])
+  ```
+
+  
 
