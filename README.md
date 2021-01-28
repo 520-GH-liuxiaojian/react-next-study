@@ -974,3 +974,111 @@ export default Home
 
 思考: PureComponent 和 memo 是通过传入属性的变化比较判定是否渲染 是如何判定的
 
+
+
+## React hooks 意义
+
+传统的类组件的存在的不足
+
++ 难以复用的状态逻辑
+  + 缺少复用机制
+  + 渲染属性和高阶组件导致层级冗余
++ 趋向于复杂难以维护
+  + 生命周期函数混杂不相干的逻辑
+  + 想干的逻辑分散在不同的生命周期 【定时器】
+  + 到处都是对状态的处理
++ this 指向问题
+  +  内联函数过度创建新的句柄
+  + 类成员函数不能保证 this 指向
+
+
+
+## hooks 组件优化点
+
++ 函数组件无 this 指向问题
++ 自定义的 hooks 方便复用代码状态逻辑
++ 副作用的关注点分离
+
+
+
+## 使用 state hooks
+
+使用 hooks 组件的约定 所有的相关的组件都应该以 use 开头
+
+传统组件编写方式
+
+```javascript
+class Home1 extends Component{
+    state = {
+        count: 0
+    }
+    render() {
+        const {count} = this.state
+        return (
+            <button
+                onClick={() => {
+                    this.setState({count: count+1})
+                }}
+            >click({count})</button>
+        )
+    }
+}
+```
+
+ Hooks 组件的编写方式
+
+```javascript
+function Home() {
+    const [count, setCount] = useState(0)
+    return (
+        <button
+            onClick={() => {
+                setCount(count + 1)
+            }}
+        >click({count})</button>
+    )
+}
+```
+
+思考：
+	useState 是如何知道 返回的就是 count?
+	useState 是如何知道是当前组件的 count 不是其他的组件的 count
+		因为 js 是单线程的 在 useState 被调用的时候只有一个唯一的全局上下文 从而就可以确定 this
+		都是利用 全局唯一性来推断内容
+
+    /**
+     * useState 务必要以稳定的顺序和状态来进行[第一次顺序决定]
+     * useState 不能动态的增加和减少使用次数 不能多也不能少
+     * 约定: useState 不能在 判断语句和循环语句中进行调用
+     */
+为了在开发中提示开发者 通常会使用 eslint 工具进行提示
+
+安装 eslint-plugin-react-hooks
+
+```shell
+yarn add eslint-plugin-react-hooks -D
+```
+
+配置 package.json
+
+```javascript
+"eslintConfig": {
+  "extends": "react-app",
+    "plugins": ["react-hooks"],
+      "rules": {
+        "react-hooks/rules-of-hooks": "error"
+      }
+}
+```
+
+
+
+useState 复杂度较高的情况
+
+```javascript
+// 这里可以通过传入回调函数的来延迟初始化默认值
+const [count, setCount] = useState(() => {
+  return props.defaultCount ?? 0
+})
+```
+
