@@ -1443,7 +1443,7 @@ const onClick = useMemo(() => {
 }, [])
 ```
 
-
+以上的写法可以通过 useCallBack 来减少代码编写量 <=> useMemo
 
 ```javascript
 const [clickCount, setClickCount] = useState(0)
