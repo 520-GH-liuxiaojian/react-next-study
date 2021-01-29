@@ -1252,5 +1252,89 @@ useEffect(() => {
   }, [])
   ```
 
-  
+  思考： 如何理解数据依赖项的不变 
+
+
+
+## 使用 context hooks API
+
+和类组件中的context 一样 在顶层组件中声明变量一次 就可以在子组件中多次使用声明的值 而不用一层层传递执行值
+
+顶层组件
+
+```javascript
+import { useContext, useState } from 'react'
+
+const CountContext = createContext()
+
+function Home() {
+    const [count, setCount] = useState(0)
+
+    return (
+        <div>
+            <button
+                onClick={() => {setCount(count + 1)}}
+            >
+                Click({count})
+            </button>
+						// 这里的写法与类组件是相似的
+            <CountContext.Provider value={count}>
+                <Counter />
+            </CountContext.Provider>
+        </div>
+    )
+}
+```
+
+原本的写法
+
+```javascript
+// 最基础的 context 的写法
+class Foo extends Component {
+    render() {
+        return (
+            <CountContext.Consumer>
+                {
+                    count => <h1>什么 这是什么嘛{count}</h1>
+                }
+            </CountContext.Consumer>
+        )
+    }
+}
+```
+
+使用 contextType 进行简写
+
+```javascript
+// 使用 contextType 简化代码编写
+class Bar extends Component {
+    static contextType = CountContext
+    render() {
+        const count = createContext
+        return (
+            <CountContext.Consumer>
+                {
+                    count => <h1>什么 这是什么嘛{count}</h1>
+                }
+            </CountContext.Consumer>
+        )
+    }
+}
+```
+
+Hooks 组件的写法
+
+```javascript
+function Counter() {
+    // 函数组件中可以多个
+    const count = useContext(CountContext)
+    return (
+        <h1>hooks 组件{count}</h1>
+    )
+}
+```
+
+通过观察 在hooks 组件中语法解释 在 hooks 组件的 context 可以存在多个 这是和类组件的最大的区别点
+
+和类组件一样 不要试图在组件中使用多个 context 会破坏组件独立性
 
