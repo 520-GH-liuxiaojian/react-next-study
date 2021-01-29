@@ -1190,6 +1190,7 @@ function Home() {
         return () => {
             window.removeEventListener('resize', onResize, false)
         }
+        // 这里可以依赖变量 也可以是一个布尔值 如果是一个布尔值 布尔值为false 不会触发执行
     }, [])
 
     return (
@@ -1241,6 +1242,8 @@ useEffect(() => {
 
 + 在 useEffect 函数的回调函数中如果返回一个函数体 那么在组件的重新渲染或则销毁的时候就会执行
 
+  这里可以依赖变量 也可以是一个布尔值 如果是一个布尔值 布尔值为false 不会触发执行
+
   ```javascript
   useEffect(() => {
     window.addEventListener('resize', onResize, false)
@@ -1250,6 +1253,16 @@ useEffect(() => {
       window.removeEventListener('resize', onResize, false)
     }
   }, [])
+  
+  useEffect(() => {
+    window.addEventListener('resize', onResize, false)
+  
+    // 组件重新渲染 或者销毁就会执行 return 语句
+    return () => {
+      window.removeEventListener('resize', onResize, false)
+    }
+    // 这里可以依赖变量 也可以是一个布尔值 如果是一个布尔值 布尔值为false 不会触发执行
+  }, [count === 3])
   ```
 
   思考： 如何理解数据依赖项的不变 
@@ -1337,4 +1350,160 @@ function Counter() {
 通过观察 在hooks 组件中语法解释 在 hooks 组件的 context 可以存在多个 这是和类组件的最大的区别点
 
 和类组件一样 不要试图在组件中使用多个 context 会破坏组件独立性
+
+
+
+## memo callback 优化组件的渲染行为
+
+在类组件中可知 memo 可以优化组件的重新渲染行为 从而优化网页的渲染 可以通过 memo 优化组件的指定的渲染
+
+memo 针对组件的渲染是否重新执行
+
+usemome 是定义了一段函数是否重新执行
+
+本质都是都过判断条件来判断指定的业务逻辑是否到执行
+
+
+
+注意：useMemo 和 useEffect 之间的区别
+
++ useMemo 有返回值 返回值直接就可以参与渲染 所以是在渲染期间完成的
++ useEffect 是渲染过后运行
+
+```javascript
+// 组件可以通过之间的讲解的 memo 进行优化
+// count 不发生改变是无法直接渲染该组件 只有改变过后才能将该组件重新进行渲染
+const Counter = memo(function Counter(props) {
+    console.log('我渲染了')
+    return (
+        <h1>hooks 组件{props.count}</h1>
+    )
+})
+
+function Home() {
+    const [count, setCount] = useState(0)
+
+    return (
+        <div>
+            <button
+                onClick={() => {setCount(count + 1)}}
+            >
+                Click({count}), double: ({double}), half: ({half})
+            </button>
+            <Counter count={double} />
+        </div>
+    )
+}
+```
+
+如果传入一个可以执行的函数 那么每次父组件渲染之后 都会导致的重新渲染 即使 count 不改变 【函数每次都是一个新值】
+
+```javascript
+const Counter = memo(function Counter(props) {
+    console.log('我渲染了')
+    return (
+        <h1 onClick={props.onClick}>hooks 组件{props.count}</h1>
+    )
+})
+
+function Home() {
+    const [count, setCount] = useState(0)
+
+    const onClick = useMemo(() => {
+        return () => {
+            console.log('点击了')
+        }
+    }, [])
+    
+    return (
+        <div>
+            <button
+                onClick={() => {setCount(count + 1)}}
+            >
+                Click({count}), double: ({double}), half: ({half})
+            </button>
+						// 每次都会重新渲染子组件 就是因为 onClick 每次执行都会以新值传入
+            <Counter count={double} onClick={onClick} />
+        </div>
+    )
+}
+```
+
+这个时候就可以通过 useMemo 优化 onClick 函数减少子组件的优化
+
+```javascript
+// 这里传入之后 会导致子组件每次渲染得到一个全新的函数而重新渲染
+// 这个时候 就可以使用 useMemo 优化
+// 使用 useMemo 之后 导致回调嵌套过多 可以使用的 useCallback 优化
+
+const onClick = useMemo(() => {
+  return () => {
+    console.log('点击了')
+  }
+}, [])
+```
+
+
+
+```javascript
+const [clickCount, setClickCount] = useState(0)
+
+// useMemo(() => fn) === useCallback(fn)
+// useCallback 如何优化性能了呢
+// useCallback 解决的是传入子组件的函数参数过度变化导致的过度的渲染问题
+
+const onClick = useCallback(() => {
+  console.log('点击了')
+  // 如果依赖 useState 过多 就需要写入数组依赖项
+  setClickCount(clickCount + 1)
+}, [clickCount, setClickCount])
+```
+
+react 官方团队优化后 set... 可以不不用在 依赖项中写入
+
+```javascript
+const [clickCount, setClickCount] = useState(0)
+
+const onClick = useCallback(() => {
+  console.log('点击了')
+  setClickCount(clickCount + 1)
+  // setClickCount 可以不用写入
+}, [clickCount])
+```
+
+还可以极度优化 如果是在 set.. 中更改值是通过回调函数更改那么 依赖数组中的 clickCount 也可以不写
+
+```javascript
+const onClick = useCallback(() => {
+  console.log('点击了')
+  // 如果是在 set.. 中更改值是通过回调函数更改那么 依赖数组中的 clickCount 也可以不写
+  setClickCount(clickCount => clickCount + 1)
+}, [])
+```
+
+useMemo 的返回值是可以参与组件的渲染
+
+```javascript
+const double = useMemo(() => {
+  console.log('这是神马嘛')
+  return count * 2
+}, [count === 3])
+```
+
+useMemo 也可以依赖多个 useMemo
+
+```javascript
+// 可以多个 useMemo 依赖
+// 但是不要循环依赖 会把浏览器搞崩溃掉
+const half = useMemo(() => {
+  return double / 4
+}, [double])
+
+
+<button
+	onClick={() => {setCount(count + 1)}}
+>
+    Click({count}), double: ({double}), half: ({half})
+</button>
+```
 
