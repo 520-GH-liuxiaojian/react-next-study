@@ -1699,55 +1699,87 @@ function App2() {
 
 ## redux 创建以及组件连接
 
+react 本身就只是一个视图层的框架 不太符合操作大量数据层的东西 如果一个项目的数据过多 就不推荐使用本身框架进行处理 而是要依赖于全家桶框架 redux
 
+原本组件之间的数据传递是通过组件与组件之间传递 如果传递层级过多 就会导致传递的值太过于冗余 不方便传递
+
+如果使用了 redux 那么就会将数据进行集中存放 而组件连接仓库 组件操作数据之后就会将仓库中的数据进行集中更改 更改之后的仓库又会通过发布订阅模式同志组件的 进行数据的更新 从而达到简化数据传递功能
+
+
+
+Redux = reducer + flux [redux 框架的前身]
+
+
+
+## redux 工作流程
+
+![index](img/index.png)
 
 ## store 创建
 
 安装 redux 
 
 ```javascript
-yarn add reduxc
+yarn add redux
 ```
 
 创建 store
 
 ```javascript
 import { createStore } from 'redux'
+import reducer from './reducer'
 
-const ADD = 'ADD'
+const store = createStore(reducer)
 
+export default store
+```
+
+创建 reducer 
+
+```javascript
 class Reducer {
-    actionType = {
-        // 这里是需要返回一个新的对象
-        ADD: state => ({count: state.count + 1}),
-    }
+    actionType = {}
 
     getReducer(state, action) {
         try {
             return this.actionType[action.type](state)
-        } catch (e) {
-            console.error(e.message)
+        } catch (error) {
+            console.warn(error.message)
             return state
         }
     }
 }
 
-function reducer(state = initialState, action) {
-    return new Reducer().getReducer(state, action)
+const defaultState = {
+    todoList: [
+        'Racing car sprays burning fuel into crowd.',
+        'Japanese princess to wed commoner.',
+        'Australian walks 100km after outback crash.',
+        'Man charged over missing wedding girl.',
+        'Los Angeles battles huge wildfires.',
+    ],
+    inputValue: '请输入内容'
 }
 
-const store = createStore(reducer, initialState)
-
-export default store
+export default (state = defaultState, action) => {
+    return new Reducer().getReducer(state, action)
+}
 ```
 
-
-
-组件更改 store 值
+组件连接 stote
 
 ```javascript
-store.dispatch({type: ADD})
+import store from '../store/store'
+
+constructor(props) {
+  super(props)
+
+  // store.getState() 就可以得到 store 中的值
+  this.state = store.getState()
+}
 ```
+
+
 
 
 
