@@ -1781,5 +1781,16 @@ constructor(props) {
 
 
 
+## 谷歌浏览器 redux 插件集成到 store
+
+在 store 连接谷歌插件 redux-devtools 
+
+```javascript
+const store = createStore(
+    reducer,
+    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+)
+```
+
 
 
