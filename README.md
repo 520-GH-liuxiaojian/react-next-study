@@ -1693,7 +1693,61 @@ function App2() {
 
 
 
-## 闭包陷阱
+## 闭包陷阱 【后期补上】
+
+
+
+## redux 创建以及组件连接
+
+
+
+## store 创建
+
+安装 redux 
+
+```javascript
+yarn add reduxc
+```
+
+创建 store
+
+```javascript
+import { createStore } from 'redux'
+
+const ADD = 'ADD'
+
+class Reducer {
+    actionType = {
+        // 这里是需要返回一个新的对象
+        ADD: state => ({count: state.count + 1}),
+    }
+
+    getReducer(state, action) {
+        try {
+            return this.actionType[action.type](state)
+        } catch (e) {
+            console.error(e.message)
+            return state
+        }
+    }
+}
+
+function reducer(state = initialState, action) {
+    return new Reducer().getReducer(state, action)
+}
+
+const store = createStore(reducer, initialState)
+
+export default store
+```
+
+
+
+组件更改 store 值
+
+```javascript
+store.dispatch({type: ADD})
+```
 
 
 
