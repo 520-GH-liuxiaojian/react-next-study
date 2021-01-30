@@ -1633,7 +1633,67 @@ dispatchCount({type: 'minus'})
 
 
 
+## ref hooks
 
+类传统 ref 是用来获取 dom 对象的
+
+```javascript
+return <span ref='abc' />
+  
+// 通过 API 就可以得到具体的 DOM
+this.refs.abc  // 17 版本就会移除
+```
+
+类推荐的写法
+
+```javascript
+class App extends Component {
+    constructor() {
+        super()
+        this.ref = createRef()
+    }
+
+    componentDidMount() {
+      	// 就可以得到指定的 DOM 元素
+        console.log(this.ref)
+    }
+
+    render() {
+        return (
+            <div>
+                <div ref={this.ref}>这是什么嘛1</div>
+                <div>这是什么嘛2</div>
+            </div>
+        )
+    }
+}
+```
+
+Hooks 组件的写法
+
+```javascript
+import React, { Component, createRef, useRef, useEffect } from 'react'
+
+function App2() {
+    const divRef = useRef()
+
+    useEffect(() => {
+      	// 和传统的 ref 一样
+        console.log(divRef)
+    })
+
+    return (
+        <div>
+            <div ref={divRef}>这是什么嘛1</div>
+            <div>这是什么嘛2</div>
+        </div>
+    )
+}
+```
+
+
+
+## 闭包陷阱
 
 
 
