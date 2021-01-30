@@ -1507,3 +1507,75 @@ const half = useMemo(() => {
 </button>
 ```
 
+
+
+## hooks 使用法则
+
+1. 只在顶层调用组件  【不能判断语句 和循环语句中调用 hooks API】 只在顶层调用组件 API 组件才会以指定的顺序渲染组件 否则可能造成组件的渲染出现问题
+2. 只在函数组件和自定义hooks函数中调用hooks API 
+
+以上两项规则 可以通过 eslint tslint 进行规避
+
+
+
+## hooks 常见问题
+
++ 生命周期函数如何映射到 Hooks 组件中
+
+```javascript
+function App() {
+    // 只调用一次
+    useEffect(() => {
+        // componentDidMount
+        return () => {
+            // componentWillUnmount
+        }
+    }, [])
+
+    let renderCounter = useRef(0)
+    renderCounter.count ++
+
+    // 可以调用多次
+    useEffect(() => {
+        if(renderCounter > 1) {
+            // componentDidUpdate
+        }
+    })
+}
+```
+
+
+
+```javascript
+class Counter extends Comment {
+    state = {
+        overflow: true,
+    }
+
+    static getDerivedStateFromProps(props, state) {
+        if(props.count > 10) {
+            return {
+                overflow: true
+            }
+        }
+    }
+}
+
+function Counter(props) {
+  const [overflow, setOverflow] = useState(false)
+  if(props.count > 10) {
+    // 这里直接 setState 不会导致死循环嘛
+    // 会 逻辑出现问题就会导致死循环
+
+    // 直接 setState 会出现性能问题嘛
+    // 不会 setstate 是在组件的渲染之前就完成 不会有性能问题
+    setOverflow(true)
+  }
+```
+
+​	并不是所有的类组件的生命周期都可以在 hooks 组件很好的替代
+
++ 类实例成员变量如何映射到 Hooks
++ Hooks 中如何获取历史 props 和 state
++ 如何强制更新一个组件
+
