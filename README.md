@@ -1794,3 +1794,45 @@ const store = createStore(
 
 
 
+## action 和 reducer 处理
+
+action 是一个对象
+
+```javascript
+const action = {
+  type: 'delete_todo_item',
+  value: index
+}
+```
+
+通过 store dispatch 派发
+
+```javascript
+handleItemDelete = index => {
+  const action = {
+    type: 'delete_todo_item',
+    value: index
+  }
+  store.dispatch(action)
+}
+```
+
+
+
+reducer 处理
+
+```javascript
+actionType = {
+  'change_input_value': (state, value) => {
+    const newState = JSON.parse(JSON.stringify(state))
+    newState.inputValue = value
+    return newState
+  }
+}
+```
+
++ reducer 可以接受 state 但是绝对绝对不能修改 state
++ 后面将修改过后的 state 返回 store
++ store 将新数据替换老的数据即可
+
+
