@@ -1836,3 +1836,75 @@ actionType = {
 + store 将新数据替换老的数据即可
 
 
+
+## actionType 统一进行拆分
+
+新建 actionType 文件
+
+```javascript
+export const CHANG_INPUT_VALUE = 'change_input_value'
+export const ADD_TODO_ITEM = 'add_todo_item'
+export const DELETE_TODO_ITEM = 'delete_todo_item'
+```
+
+在 组件中
+
+```javascript
+import {
+    ADD_TODO_ITEM,
+    CHANG_INPUT_VALUE,
+    DELETE_TODO_ITEM
+} from '../store/actionType'
+
+handleInputChange = event => {
+  store.dispatch({
+    type: CHANG_INPUT_VALUE,
+    value: event.target.value
+  })
+}
+
+handleButtonClick = () => {
+  store.dispatch({
+    type: ADD_TODO_ITEM,
+  })
+}
+
+handleItemDelete = index => {
+  const action = {
+    type: DELETE_TODO_ITEM,
+    value: index
+  }
+  store.dispatch(action)
+}
+```
+
+在 reducer 组件中
+
+```javascript
+actionType = {
+  // reducer 可以接受 state 但是绝对绝对不能修改 state
+  // 后面将修改过后的 state 返回 store
+  // store 将新数据替换老的数据即可
+  CHANG_INPUT_VALUE: (state, value) => {
+    const newState = JSON.parse(JSON.stringify(state))
+    newState.inputValue = value
+    return newState
+  },
+  ADD_TODO_ITEM: state => {
+    const newState = JSON.parse(JSON.stringify(state))
+    if(!newState.inputValue.length) {
+      message.warn('请输入内容')
+      return
+    }
+    newState.todoList.push(newState.inputValue)
+    newState.inputValue = ''
+    return newState
+  },
+  DELETE_TODO_ITEM: (state, value) => {
+    const newState = JSON.parse(JSON.stringify(state))
+    newState.todoList.splice(value, 1)
+    return newState
+  }
+}
+```
+
