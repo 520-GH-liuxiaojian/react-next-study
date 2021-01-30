@@ -1908,3 +1908,55 @@ actionType = {
 }
 ```
 
+
+
+## 使用 actionCreate 统一创建 action
+
+在 store 新建 actionCreate 文件
+
+```javascript
+import {
+    CHANG_INPUT_VALUE,
+    ADD_TODO_ITEM,
+    DELETE_TODO_ITEM
+} from './actionType'
+
+export const getInputChangeAction = value => ({
+    type: CHANG_INPUT_VALUE,
+    value
+})
+
+export const getAddItemAction = () => ({
+    type: ADD_TODO_ITEM,
+})
+
+export const getDeleteItemAction = value => ({
+    type: DELETE_TODO_ITEM,
+    value
+})
+
+```
+
+在组件中
+
+```javascript
+handleInputChange = event => {
+  const action = getInputChangeAction(event.target.value)
+  store.dispatch(action)
+}
+
+handleButtonClick = () => {
+  const action = getAddItemAction()
+  store.dispatch(action)
+}
+
+handleItemDelete = index => {
+  const action = getDeleteItemAction(index)
+  store.dispatch(action)
+}
+```
+
+这样写的目的是为了后期 异步处理 reducre 和 方便单元测试
+
+
+
