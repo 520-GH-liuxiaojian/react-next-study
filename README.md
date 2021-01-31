@@ -1960,3 +1960,36 @@ handleItemDelete = index => {
 
 
 
+## redux 知识点进行补充
+
++ Store  必须是唯一的 一个项目的仅仅只有一个 数据仓库存在
+
++ 只有 store 才可以改变自己内容：
+
+  ```
+  reducer 可以接受 state 但是绝对绝对不能修改 state
+  后面将修改过后的 state 返回 store
+  store 将新数据替换老的数据即可
+  ```
+
++  Reducer 必须是纯函数
+
+  纯函数是指 有固定的输入 就一定有固定的输出 而且不会有任何的副作用存在
+
+  ```javascript
+  ADD_TODO_ITEM: state => {
+    const newState = JSON.parse(JSON.stringify(state))
+    // 以下就是副作用 不应该在 reducer 中出现
+    if(!newState.inputValue.length) {
+      message.warn('请输入内容')
+      return
+    }
+    newState.todoList.push(newState.inputValue)
+    newState.inputValue = ''
+    return newState
+  },
+  ```
+
+  
+
++ 

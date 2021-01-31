@@ -5,13 +5,11 @@ import {
     DELETE_TODO_ITEM
 } from './actionType'
 
-function nameDecorator(target, key) {
-    console.log(target, key)
-}
-
 class Reducer {
-    // @nameDecorator
     actionType = {
+        // reducer 可以接受 state 但是绝对绝对不能修改 state
+        // 后面将修改过后的 state 返回 store
+        // store 将新数据替换老的数据即可
         CHANG_INPUT_VALUE: (state, value) => {
             const newState = JSON.parse(JSON.stringify(state))
             newState.inputValue = value
@@ -34,12 +32,10 @@ class Reducer {
         }
     }
 
-
     getReducer(state, action) {
         try {
             const { type, value } = action
-            console.log(type)
-            // return this.actionType[type](state, value)
+            return this.actionType[type](state, value)
         } catch (error) {
             console.warn(error.message)
             return state
