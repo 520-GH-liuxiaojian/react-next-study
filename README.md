@@ -1976,6 +1976,8 @@ handleItemDelete = index => {
 
   纯函数是指 有固定的输入 就一定有固定的输出 而且不会有任何的副作用存在
 
+  有任何数据的更新的时候返回一个对象
+
   ```javascript
   ADD_TODO_ITEM: state => {
     const newState = JSON.parse(JSON.stringify(state))
@@ -1987,9 +1989,28 @@ handleItemDelete = index => {
     newState.todoList.push(newState.inputValue)
     newState.inputValue = ''
     return newState
-  },
+  }
+  ```
+  + reducer s是可以通过 combineReducers 进行合并
+
+  ```javascript
+  import todoListReducer from './todoList/reducer'
+  import useReducer from './use/reducer'
+  
+  // 通过这个 combineReducers 就可以将多个 reducer 进行合并 
+  const allReducer = combineReducers({
+      todoList: todoListReducer,
+      use: useReducer,
+  })
+  
+  const store = createStore(allReducer)
+  
+  export default store
   ```
 
   
 
-+ 
+
+
+## redux 中发送异步请求
+
