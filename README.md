@@ -2014,3 +2014,171 @@ handleItemDelete = index => {
 
 ## redux 中发送异步请求
 
+传统的异步的逻辑的编写的方法是在 组件的生命周期中的通过 一步的代码的模块进行代码的编写
+
+通常都会在的项目中安装 axios
+
+```shell
+yarn add axios 
+```
+
+在组件的生命周期的中 componentDidMount 进行异步的代码的编写
+
+```javascript
+componentDidMount() {
+  axios.get('/list.json').then(result => {
+    const data = result.data
+    const action = initListAction(data)
+    store.dispatch(action)
+  })
+}
+```
+
+以上代码就可以实现数据异步的逻辑的加载 但是 这样的写法随着组件的业务的逻辑的增加的就会充斥的大量的代码的 从而的组件的代码的量的就显得极其臃肿 最好的实现方式就会的数据的额异步加载的方案提取出去
+
+在 redux 的世界中就可以使用异步加载的中间件进行数据的异步加载获取
+
++ Redux-thunk
++ Redux-saga
+
+首先安装 redux-thunk 中间件
+
+```javascript
+yarn add redux-thunk
+```
+
+如何将 redux-thunk 融合进 redux
+
+在创建的 store 的时候的我们需要将的 redux 调试工具 devoolt 和 thunk 进行混合添加
+
+```javascript
+const composeEnhancers =
+    typeof window === 'object' &&
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?
+        window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+    }) : compose;
+
+const enhancer = composeEnhancers(applyMiddleware(thunk));
+
+const allReducer = combineReducers({
+    todoList: todoListReducer,
+    use: useReducer,
+})
+
+const store = createStore( allReducer, enhancer )
+```
+
+通过以上的方法就可以将 redux-thunk 和 devtools 融合成功
+
+通过的 redux-thunk 就可以将 组件的中的异步代码移除出去 移到 actionCreate 中的 但凡是的业务逻辑的就可以写进 action 而不是的写进的 reducer 中。。。之前的 action 是一个对象 在但是现在 action 中可以通过返回一个回调函数 进行异步的代码的操作的
+
+```javascript
+// 这是传统的 actionCreate
+const initListAction = value => ({
+    type: INIT_LIST_ACTION,
+    value
+})
+
+// 这是通过 redux-thunk 进行处理的代码 这里的代码的就可以的返回一个方法 这个方法中可以处理 异步的代码
+export const getTodoList = () => {
+  	// 返回的函数的参数的就可以的得到的 store 的 dispatch 参数
+    return async dispatch => {
+        const data = await axios.get('/api/todolist')
+        const temp = JSON.parse(JSON.stringify(data))
+        dispatch(initListAction(temp.data.data))
+    }
+}
+```
+
+在组件中就可以通过生命周期的钩子处理的异步数据的加载
+
+```javascript
+componentDidMount() {
+  const action = getTodoList()
+  store.dispatch(action)
+}
+```
+
+
+
+## 解释的什么是中间件
+
+中间件就是的 store dispatch 进行升级
+
+redux的核心 就是控制和管理所有的数据输入输出 因此有了dispatch 由于dispatch是一个很纯的纯函数 就是单纯的派发action来更改数据 其功能简单且固定
+
+如果我们的程序中有很多的dispatch，我们就需要添加很多的重复代码，虽然编辑器提供批量替换，但这无疑是产生了很多样板代码
+
+所有的需求都是和dispatch息息相关，所以只要我们把日志放进dispatch函数里，不就好了吗，我们只需要更改dispatch函数，把dispatch进行一层封装
+
+
+
+## redux-saga 中间件的使用
+
+安装的 redux-saga 中间件 在创建的 store 的时候 将 redux-saga 中间件进行集成
+
+```javascript
+import { combineReducers, createStore, applyMiddleware, compose } from 'redux'
+import createSagaMiddleware from 'redux-saga'
+
+import todoListReducer from './todoList/reducer'
+import useReducer from './use/reducer'
+// 需要引入一个处理 redux-saga 的文件
+import todoListSaga from '../model/todolist'
+
+// 创建 redux-saga
+const sagaMiddleware = createSagaMiddleware()
+const composeEnhancers =
+    typeof window === 'object' &&
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?
+        window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({}) : compose
+
+// 在 redux 中集成
+const enhancer = composeEnhancers(applyMiddleware(sagaMiddleware))
+
+const allReducer = combineReducers({
+    todoList: todoListReducer,
+    use: useReducer
+})
+
+const store = createStore( allReducer, enhancer )
+// 运行的 saga 文件
+sagaMiddleware.run(todoListSaga)
+
+export default store
+```
+
+新建 saga 文件
+
+```javascript
+import { takeEvery, put } from 'redux-saga/effects'
+import { GET_INIT_LIST } from '../store/todoList/actionType'
+import { genInitList } from '../store/todoList/actionCreate'
+import axios from 'axios'
+// import { initList } from '../server/todolist'
+
+function* getInitList() {
+    const result = yield axios.get('/api/todolist')
+    const { data } = JSON.parse(JSON.stringify(result))
+    const action = genInitList(data.data)
+    yield put(action)
+    console.log('abc')
+}
+
+console.log(getInitList())
+
+function* todoListSaga() {
+ 		// 匹配对应的 action type 匹配到就执行执行的 axios 代码
+     yield takeEvery(GET_INIT_LIST, getInitList)
+}
+
+export default todoListSaga
+
+```
+
+
+
+
+
+
+
