@@ -3,6 +3,7 @@ import {
     ADD_TODO_ITEM,
     CHANG_INPUT_VALUE,
     DELETE_TODO_ITEM,
+    INIT_LIST_ACTION
 } from './actionType'
 import { handleRepeatCodeFn } from '../../businessLogicUtils'
 
@@ -33,9 +34,13 @@ class Reducer {
             return handleRepeatCodeFn(state, newState => {
                 newState.todoList.splice(value, 1)
             })
+        },
+        [INIT_LIST_ACTION]: (state, value) => {
+            return handleRepeatCodeFn(state, newState => {
+                newState.todoList = value
+            })
         }
     }
-
 
     getReducer(state, action) {
         const { type, value } = action

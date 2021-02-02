@@ -5,6 +5,7 @@ import {
     getAddItemAction,
     getDeleteItemAction,
     getInputChangeAction,
+    getTodoList
 } from '../store/todoList/actionCreate'
 
 import './TodoList.css'
@@ -22,6 +23,11 @@ class TodoList extends Component{
         // 当 store 内容发生改变 就会自动触发指定的方法
         // 这个方法就会将组件的状态进行覆盖式更新
         store.subscribe(this.handleStoreChange)
+    }
+
+    componentDidMount() {
+        const action = getTodoList()
+        store.dispatch(action)
     }
 
     handleStoreChange = () => {
