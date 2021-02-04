@@ -2261,7 +2261,68 @@ mapStateToProps, mapDispatchToProps 方法中返回的属性和方法就会融�
 
 
 
-## react-redux 融入组件并进行服务端的渲染
+## react 开发模式 Hoc 【接受组件为参数的并且返回新的组件】
+
+```javascript
+export default (Comp) => {
+    return function testHoc({Component, pageProps, ...rest}) {
+        console.log(Component, pageProps)
+        pageProps.test = '123'
+        return <Comp Component={Component} pageProps={pageProps} {...rest}  />
+    }
+}
+```
+
+
+
+## 服务端如何集成 redux
+
++ 服务端如何写入数据到 store
++ 如何同步服务端的数据到客户端
+
+
+
+以往前端数据写入 store 的时候的都会返回的旧的store 数据给前端【单例 store】 这个时候就会出现的数据同步的异常的出现的 我们就需要改造的 store 创建方式 让每一次的数据访问是一个的 新的 store 仓库
+
+
+
+## OAuto 授权和认证
+
+ 认证： 如何证明你的身份
+
+常用的认证的方式
+
++ 用户名密码登陆
++ 邮箱发送登陆的连接
++ 手机号发送登陆验证码
+
+ 为什么需要以上的手段进行用户的身份的验证的呢
+
++ 设置一套高可用的密码系统很难
+
+  + 让用户设置的高强度的密码
+  + 对密码存储进行的加密
+  + 要保证客户端的和服务端的进行安全通行 防止密码被中间人获取
+  + 将密码保存在安全数据库中
+  + 为忘记密码的用户的提供恢复密码的功能
+  + 为了进一步安全实施两步验证
+
+  
+
+  浏览器常用的认证方式的是通过 cookie 进行用户的认证
+
+  
+
+  ### 授权并不一定要认证
+
+  + 优惠券就可以享受优惠券
+  + 云盘的图片分享 【有连接就可以访问】
+
+  
+
+  注意: OAuth 就可以通过 token 进行认证授予权限
+
+  
 
 
 
