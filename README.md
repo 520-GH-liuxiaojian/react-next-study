@@ -2072,6 +2072,32 @@ const store = createStore( allReducer, enhancer )
 
 通过的 redux-thunk 就可以将 组件的中的异步代码移除出去 移到 actionCreate 中的 但凡是的业务逻辑的就可以写进 action 而不是的写进的 reducer 中。。。之前的 action 是一个对象 在但是现在 action 中可以通过返回一个回调函数 进行异步的代码的操作的
 
+
+
+以上的 dev-tools 集成 可以通过 redux-dev-tool 进行集成 不用写以上这些繁琐的代码
+
+安装 redux-dev-tool
+
+```shell
+yarn add redux-devtools-extension
+```
+
+在创建 store 仓库中进行集成
+
+```javascript
+import { composeWithDevTools } from 'redux-devtools-extension'
+const allReducer = combineReducers({
+    todoList: todoListReducer,
+    use: useReducer,
+})
+
+const store = createStore( allReducer, composeWithDevTools(applyMiddleware(thunk)) )
+
+export default store
+```
+
+
+
 ```javascript
 // 这是传统的 actionCreate
 const initListAction = value => ({
@@ -2177,6 +2203,65 @@ export default todoListSaga
 ```
 
 
+
+## react-redux 集成到项目中
+
+安装 react-redux 
+
+```javascript
+yarn add react-redux
+```
+
+在 app 文件中 使用 Provider 将组件进行包裹 这样所有的页面的组件的就可以的得到 store 中的所有内容
+
+```javascript
+import { Provider } from 'react-redux'
+import store from '../store'
+
+ <Provider store={store}>
+   <Component {...pageProps} />
+</Provider>
+```
+
+在组件中使用 connect 方法将组件进行包装
+
+```javascript
+import { connect } from 'react-redux'
+
+class TodoList extends Component {
+  render() {
+    return <div>这是什么吗？</div>
+  }
+}
+
+const mapStateToProps = state => ({
+    inputValue: state.inputValue
+})
+
+const mapDispatchToProps = dispatch => ({
+	handleInputChange = event => {
+    const action = getInputChangeAction(event.target.value)
+  		dispatch(action)
+  	},
+  	handleButtonClick = () => {
+    	const action = getAddItemAction()
+    	store.dispatch(action)
+  	},
+    handleItemDelete = index => {
+      const action = getDeleteItemAction(index)
+      store.dispatch(action)
+    }
+})
+
+//mapStateToProps, mapDispatchToProps 方法中返回的属性和方法就会融合进 组件中
+export default connect(mapStateToProps, mapDispatchToProps)(TodoList)
+```
+
+mapStateToProps, mapDispatchToProps 方法中返回的属性和方法就会融合进 组件中 如果的组件没有特殊方法 就可以将组件的改造成为无状态的组件 但是的通过 connect 方法包装过后的组件的就是i一个容器组件
+
+
+
+## react-redux 融入组件并进行服务端的渲染
 
 
 

@@ -58,7 +58,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => {
     return {
-        handleInputChange = event => {
+        handleInputChange = event => {Z
             const action = getInputChangeAction(event.target.value)
             dispatch(action)
         },
